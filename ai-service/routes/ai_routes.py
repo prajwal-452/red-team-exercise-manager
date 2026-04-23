@@ -9,11 +9,13 @@ def load_prompt(file_name):
     with open(f"prompts/{file_name}", "r") as f:
         return f.read()
 
+
+# -------------------- DESCRIBE --------------------
+
 @ai_bp.route("/describe", methods=["POST"])
 def describe():
     data = request.get_json()
 
-    # Input validation
     if not data or "text" not in data:
         return jsonify({"error": "Missing 'text' field"}), 400
 
@@ -22,15 +24,18 @@ def describe():
     if not isinstance(user_input, str) or len(user_input.strip()) == 0:
         return jsonify({"error": "Invalid input"}), 400
 
+    if len(user_input) > 500:
+        return jsonify({"error": "Input too long"}), 400
+
     try:
-        #  Load prompt
         prompt_template = load_prompt("describe.txt")
         final_prompt = prompt_template.replace("{input}", user_input)
 
-        #  Call AI
         ai_output = generate_response(final_prompt)
 
-        # Convert AI output string → JSON
+        if ai_output is None:
+            return jsonify({"error": "AI unavailable"}), 503
+
         parsed_output = json.loads(ai_output)
 
         return jsonify({
@@ -40,6 +45,46 @@ def describe():
 
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid AI JSON response"}), 500
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------- RECOMMEND --------------------
+
+@ai_bp.route("/recommend", methods=["POST"])
+def recommend():
+    data = request.get_json()
+
+    if not data or "text" not in data:
+        return jsonify({"error": "Missing 'text' field"}), 400
+
+    user_input = data["text"]
+
+    if not isinstance(user_input, str) or len(user_input.strip()) == 0:
+        return jsonify({"error": "Invalid input"}), 400
+
+    if len(user_input) > 500:
+        return jsonify({"error": "Input too long"}), 400
+
+    try:
+        prompt_template = load_prompt("recommend.txt")
+        final_prompt = prompt_template.replace("{input}", user_input)
+
+        ai_output = generate_response(final_prompt)
+
+        if ai_output is None:
+            return jsonify({"error": "AI unavailable"}), 503
+
+        parsed_output = json.loads(ai_output)
+
+        return jsonify({
+            "generated_at": datetime.utcnow().isoformat(),
+            "recommendations": parsed_output
+        })
+
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid AI JSON"}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

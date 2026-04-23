@@ -36,3 +36,8 @@ Ensure:
 - Always include 3–4 steps
 - Risk level must be accurate based on real-world severity
 - Banking, healthcare, authentication attacks → ALWAYS High risk
+
+if ai_output is None:
+    return jsonify({"error": "AI service unavailable"}), 503
+if len(user_input) > 500:
+    return jsonify({"error": "Input too long"}), 400
