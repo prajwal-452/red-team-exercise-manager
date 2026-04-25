@@ -1,13 +1,13 @@
 package com.internship.redteam.service;
 
 import com.internship.redteam.entity.User;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
 
     User createUser(User user);
 
-    User getUserByEmail(String email);
+    User getUserById(Long id);
 
-    List<User> getAllUsers();
+    Page<User> getAllUsers(int page, int size);
 }
