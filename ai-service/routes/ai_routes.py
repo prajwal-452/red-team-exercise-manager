@@ -75,6 +75,9 @@ def describe():
         # 🔹 Save to cache
         set_cache(user_input, parsed_output)
 
+        # 🔹 Save to cache
+        set_cache(user_input, parsed_output)
+
         return jsonify({
             "generated_at": datetime.utcnow().isoformat(),
             "data": parsed_output
@@ -137,6 +140,8 @@ def recommend():
                 "data": parsed_output["data"],
                 "is_fallback": True
             })
+        set_cache(user_input, parsed_output)
+
         set_cache(user_input, parsed_output)
 
         return jsonify({
