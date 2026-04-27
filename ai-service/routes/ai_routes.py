@@ -37,8 +37,16 @@ def describe():
     if error:
         return jsonify({"error": error}), 400
 
-    user_input = data["text"]
+    user_input = data["text"].strip()
 
+    # limit length (ZAP safe)
+    if len(user_input) > 500:
+        return jsonify({"error": "Input too long"}), 400
+
+    # prompt injection protection
+    blocked_words = ["ignore previous", "system prompt", "override", "bypass"]
+    if any(word in user_input.lower() for word in blocked_words):
+        return jsonify({"error": "Potential prompt injection detected"}), 400
     # 🔹 Check cache
     cached = get_cached(user_input)
     if cached:
@@ -58,6 +66,14 @@ def describe():
             return jsonify({"error": "AI unavailable"}), 503
 
         parsed_output = json.loads(ai_output)
+        if "is_fallback" in parsed_output:
+            return jsonify({
+                "generated_at": datetime.utcnow().isoformat(),
+                "data": parsed_output["data"],
+                "is_fallback": True
+            })
+        # 🔹 Save to cache
+        set_cache(user_input, parsed_output)
 
         # 🔹 Save to cache
         set_cache(user_input, parsed_output)
@@ -70,8 +86,14 @@ def describe():
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid AI JSON response"}), 500
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        return jsonify({
+            "generated_at": datetime.utcnow().isoformat(),
+            "data": {
+                "message": "AI service temporarily unavailable"
+            },
+            "is_fallback": True
+        }), 200
 
 
 # -------------------- RECOMMEND --------------------
@@ -84,8 +106,16 @@ def recommend():
     if error:
         return jsonify({"error": error}), 400
 
-    user_input = data["text"]
+    user_input = data["text"].strip()
 
+    # limit length (ZAP safe)
+    if len(user_input) > 500:
+        return jsonify({"error": "Input too long"}), 400
+
+    # prompt injection protection
+    blocked_words = ["ignore previous", "system prompt", "override", "bypass"]
+    if any(word in user_input.lower() for word in blocked_words):
+        return jsonify({"error": "Potential prompt injection detected"}), 400
     cached = get_cached(user_input)
     if cached:
         return jsonify({
@@ -104,6 +134,13 @@ def recommend():
             return jsonify({"error": "AI unavailable"}), 503
 
         parsed_output = json.loads(ai_output)
+        if "is_fallback" in parsed_output:
+            return jsonify({
+                "generated_at": datetime.utcnow().isoformat(),
+                "data": parsed_output["data"],
+                "is_fallback": True
+            })
+        set_cache(user_input, parsed_output)
 
         set_cache(user_input, parsed_output)
 
@@ -115,8 +152,14 @@ def recommend():
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid AI JSON"}), 500
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        return jsonify({
+            "generated_at": datetime.utcnow().isoformat(),
+            "data": {
+                "message": "AI service temporarily unavailable"
+            },
+            "is_fallback": True
+        }), 200
 
 
 # -------------------- GENERATE REPORT --------------------
@@ -129,7 +172,16 @@ def generate_report():
     if error:
         return jsonify({"error": error}), 400
 
-    user_input = data["text"]
+    user_input = data["text"].strip()
+
+    # limit length (ZAP safe)
+    if len(user_input) > 500:
+        return jsonify({"error": "Input too long"}), 400
+
+    # prompt injection protection
+    blocked_words = ["ignore previous", "system prompt", "override", "bypass"]
+    if any(word in user_input.lower() for word in blocked_words):
+        return jsonify({"error": "Potential prompt injection detected"}), 400
 
     cached = get_cached(user_input)
     if cached:
@@ -149,7 +201,12 @@ def generate_report():
             return jsonify({"error": "AI unavailable"}), 503
 
         parsed_output = json.loads(ai_output)
-
+        if "is_fallback" in parsed_output:
+            return jsonify({
+                "generated_at": datetime.utcnow().isoformat(),
+                "data": parsed_output["data"],
+                "is_fallback": True
+            })
         set_cache(user_input, parsed_output)
 
         return jsonify({
@@ -160,5 +217,11 @@ def generate_report():
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid AI JSON"}), 500
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        return jsonify({
+            "generated_at": datetime.utcnow().isoformat(),
+            "data": {
+                "message": "AI service temporarily unavailable"
+            },
+            "is_fallback": True
+        }), 200
