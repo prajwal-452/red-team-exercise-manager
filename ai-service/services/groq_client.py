@@ -1,34 +1,33 @@
-from groq import Groq
 import os
-from dotenv import load_dotenv
 import time
-import json
-from services.metrics import response_times
+from groq import Groq
+from dotenv import load_dotenv
+
+# Load environment variables
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# Get API key
+api_key = os.getenv("GROQ_API_KEY")
 
+# Create client
+client = Groq(api_key=api_key)
 
-def generate_response(prompt):
-    raise Exception("test")
-    start = time.time()
+def call_groq(prompt):
+    for attempt in range(3):  # retry 3 times
+        try:
+            print(f"Attempt {attempt+1}...")
 
-    try:
-        result = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[{"role": "user", "content": prompt}]
-        )
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
 
-        output = result.choices[0].message.content
+            return response.choices[0].message.content
 
-        end = time.time()
-        response_times.append(end - start)
+        except Exception as e:
+            print("Error:", e)
+            time.sleep(2)
 
-        return output
-    except Exception:
-        return json.dumps({
-            "is_fallback": True,
-            "data": {
-                "message": "AI service temporarily unavailable"
-            }
-        })
+    return "AI failed after 3 attempts"
