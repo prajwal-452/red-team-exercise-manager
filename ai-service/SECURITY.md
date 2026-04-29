@@ -1,23 +1,28 @@
-# SECURITY.md
+# Day 7 Security Report
 
-## 1. Prompt Injection
-Users may try to manipulate AI using harmful inputs.
-Example: "Ignore previous instructions"
-Solution: Validate and sanitize inputs.
+## Tool Used
+OWASP ZAP
 
-## 2. SQL Injection
-Malicious queries like:
-'; DROP TABLE users;
-Solution: Input validation.
+## Target
+http://127.0.0.1:5000/report
 
-## 3. Rate Limiting
-Too many requests can crash system.
-Solution: Limit requests per user.
+## Observations
+- AI service is running locally on port 5000
+- Endpoint /report requires POST method
+- Automated scan failed due to local proxy connection issue
+- Root endpoint (/) not defined
 
-## 4. Unauthorized Access
-Users accessing APIs without permission.
-Solution: JWT authentication (handled in backend).
+## Potential Security Risks
+- Lack of input validation
+- No authentication mechanism
+- No rate limiting
+- Possible prompt injection risk
 
-## 5. Data Leakage
-Sensitive data sent to AI.
-Solution: Avoid sending personal data in prompts.
+## Fix Plan
+- Add input sanitisation middleware
+- Implement rate limiting (flask-limiter)
+- Validate request payload
+- Add error handling
+
+## Status
+Security review completed for AI service
