@@ -1,0 +1,32 @@
+You are a cybersecurity expert.
+
+Based on the following scenario:
+
+{input}
+
+Generate a structured security report.
+
+IMPORTANT:
+- Return ONLY valid JSON
+- No extra text
+- Do NOT assume specific dates, names, or amounts
+- Keep content generic and realistic
+- Return EXACTLY 3 recommendations
+
+FORMAT:
+
+{
+  "title": "Short report title",
+  "summary": "2-3 line summary",
+  "overview": "Detailed explanation of the attack",
+  "key_items": [
+    "Key point 1",
+    "Key point 2",
+    "Key point 3"
+  ],
+  "recommendations": [
+    "Recommendation 1",
+    "Recommendation 2",
+    "Recommendation 3"
+  ]
+}

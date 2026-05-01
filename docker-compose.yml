@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  ai-service:
+    build:
+      context: ./ai-service
+    env_file:
+      - ./ai-service/.env
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GROQ_MODEL: llama-3.1-8b-instant
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis

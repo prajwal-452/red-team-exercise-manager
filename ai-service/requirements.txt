@@ -1,0 +1,8 @@
+flask==3.0.0
+python-dotenv==1.0.1
+groq==0.13.1
+flask-limiter==3.8.0
+redis==5.2.1
+requests==2.32.3
+pydantic==2.10.4
+tf-keras==2.15.0
